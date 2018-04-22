@@ -8,7 +8,7 @@ object wordCount4sparkSession {
 
     if (args.length < 1) {
       System.err.println("Usage: wordCount4sparkSession <input path> [output path]")
-      System.exit(1)
+      System.exit(-1)
     }
 
     val spark = SparkSession.builder.
