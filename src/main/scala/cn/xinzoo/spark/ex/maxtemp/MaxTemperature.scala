@@ -33,7 +33,7 @@ object MaxTemperature {
 
     val maxTemperature = kv.rdd.flatMap(_,_)
       //.flatMap(_,_).reduce(Math.max(_,_))
-    //maxTemperature.
+    //maxTemperature.报错
     if (args.length > 1)
       maxTemperature.saveAsTextFile(args(1))
     else
