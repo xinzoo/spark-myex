@@ -8,7 +8,7 @@ object MaxTemperature {
 
     val MISSING = 9999
 
-    if (args.length ne 2) {
+    if (args.length < 2) {
       System.err.println("Usage:MaxTemperature <input path> <output path>")
       System.exit(-1)
     }
@@ -16,31 +16,25 @@ object MaxTemperature {
     val spark  = SparkSession.builder().
       appName("spark in MaxTemperature").
       getOrCreate()
-    //val weaDataSet = spark.read.textFile("ncdc-input")
-    //val MISSING = 9999
+    //val weaDataSet = spark.read.textFile("ncdc-input") 用于在spark-shell测试
+    //val MISSING = 9999  用于在spark-shell测试
     val weaDataSet =  spark.read.textFile(args(0))
     import spark.implicits._
 
     val kv = for {
       line:String <- weaDataSet
-
       temp = line.substring(87,92).toInt
       year = line.substring(15,19)
       quality = line.substring(92,93)
     } yield if (temp != MISSING && quality.matches("[01459]")) {
-      (year,temp)
-    } else (year,Integer.MIN_VALUE)
+      (year -> temp)
+    } else (year -> Integer.MIN_VALUE)
 
-    val maxTemperature = kv.rdd.flatMap(_,_)
-      //.flatMap(_,_).reduce(Math.max(_,_))
-    //maxTemperature.报错
-    if (args.length > 1)   //测试新的get
-      maxTemperature.saveAsTextFile(args(1))
-    else
-      println(maxTemperature.collect())
+    val maxTemperature = kv.rdd.reduceByKey(Math.max(_,_))
+
+    maxTemperature.saveAsTextFile(args(1))
+
     //业务逻辑结束
-
-    sc.stop()
-    //kv.groupBy()
+    spark.stop()
   }
 }
