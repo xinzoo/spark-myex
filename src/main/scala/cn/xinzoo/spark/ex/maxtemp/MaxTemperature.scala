@@ -26,11 +26,9 @@ object MaxTemperature {
       temp = line.substring(87,92).toInt
       year = line.substring(15,19)
       quality = line.substring(92,93)
-    } yield if (temp != MISSING && quality.matches("[01459]")) {
-      (year -> temp)
-    } else (year -> Integer.MIN_VALUE)
+    } yield if (temp != MISSING && quality.matches("[01459]")) year -> temp else year -> Integer.MIN_VALUE
 
-    val maxTemperature = kv.rdd.reduceByKey(Math.max(_,_))
+    val maxTemperature = kv.rdd.reduceByKey(Math.max)
 
     maxTemperature.saveAsTextFile(args(1))
 
